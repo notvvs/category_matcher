@@ -2,6 +2,7 @@ from typing import List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.models.category import Category
 
@@ -17,14 +18,14 @@ class CategoryRepo:
 
         return list(result.scalars().all())
 
-    async def get_category_id(self, category_name: str) -> List[int]:
-        stmt = select(Category.id).where(Category.name == category_name)
+    async def get_children(self, parent_name: str) -> List[str]:
+        """Получить потомков категории товара по названию родителя"""
+        stmt = (
+            select(Category)
+            .where(Category.name == parent_name)
+            .options(selectinload(Category.children))
+        )
         result = await self.session.execute(stmt)
-
-        return list(result.scalars().all())
-
-    async def get_children(self, parent_id: int) -> List[str]:
-        stmt = select(Category.name).where(Category.parent_id == parent_id)
-        result = await self.session.execute(stmt)
-
-        return list(result.scalars().all())
+        category = result.scalar_one_or_none()
+        names = [category.name for category in category.children]
+        return names
