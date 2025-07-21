@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     # Настройка подключения к MongoDB
     MONGO_HOST: str = 'localhost'
     MONGO_PORT: int = 27017
+    MONGO_DB_NAME: str = 'Test'
 
     # Получение ссылки для подключения к Postgres
     @property
@@ -20,7 +21,7 @@ class Settings(BaseSettings):
 
     @property
     def get_mongo_dsn(self) -> str:
-        return f'mongodb://{self.MONGO_HOST}"{self.MONGO_PORT}'
+        return f'mongodb://{self.MONGO_HOST}:{self.MONGO_PORT}'
 
     class Config:
         env_file = ".env"

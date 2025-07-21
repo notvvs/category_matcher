@@ -13,5 +13,5 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 async def get_mongo_db() -> AsyncIOMotorDatabase:
     """Получение базы данных MongoDB для ДИ"""
-    client = AsyncIOMotorClient(settings.get_mongo_connection_string)
+    client = AsyncIOMotorClient(settings.get_mongo_dsn)
     return client[settings.MONGO_DB_NAME]

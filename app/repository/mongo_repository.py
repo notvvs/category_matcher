@@ -1,14 +1,10 @@
 from typing import List, Dict, Any, Optional
-from motor.motor_asyncio import AsyncIOMotorCollection
+from motor.motor_asyncio import AsyncIOMotorDatabase, AsyncIOMotorCollection
 from bson import ObjectId
 
-from app.db.mongo_postgres import get_mongo_db
-
-
 class MongoRepository:
-    def __init__(self, collection_name: str):
-        self.db = get_mongo_db()
-        self.collection: AsyncIOMotorCollection = self.db[collection_name]
+    def __init__(self, database: AsyncIOMotorDatabase, collection_name: str):
+        self.collection: AsyncIOMotorCollection = database[collection_name]
 
     async def add(self, data: Dict[str, Any]) -> str:
         """Добавить документ"""
