@@ -5,8 +5,8 @@ from app.core.settings import settings
 Base = declarative_base()
 
 engine: AsyncEngine = create_async_engine(
-    settings.pg_url,
-    echo=True,
+    settings.get_postgres_connection_link,
+    echo=False,
 )
 
 async_session = async_sessionmaker(

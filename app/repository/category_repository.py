@@ -1,16 +1,18 @@
-import asyncio
 from typing import List
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.db.tables import category_table  # Таблица с колонками
+
+from app.models.category import Category
 
 
 class CategoryRepo:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_parents(self) -> List[str]:
-        # Запрос для получения родительских категорий
-        stmt = select(category_table).where(category_table.c.parent_id == None)
+    async def get_parent_categories(self) -> List[Category]:
+        """Получить все родительские категории (у которых parent_id == None)"""
+        stmt = select(Category).where(Category.parent_id.is_(None))
         result = await self.session.execute(stmt)
-        return result.fetchall()
+
+        return list(result.scalars().all())
