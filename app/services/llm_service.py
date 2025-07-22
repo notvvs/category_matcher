@@ -12,7 +12,7 @@ class OllamaCategorizer:
         self.model_name = settings.MODEL_NAME
         self.llm_url = settings.LLM_URL
 
-    def categorize_product(self, product_name: str, description: str, category_list: list) -> Optional[str]:
+    async def categorize_product(self, product_name: str, description: str, category_list: list) -> Optional[str]:
         """Категоризирует товар используя Ollama"""
 
         prompt = f"""
