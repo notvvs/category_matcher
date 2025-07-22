@@ -12,7 +12,11 @@ class Settings(BaseSettings):
     # Настройка подключения к MongoDB
     MONGO_HOST: str = 'localhost'
     MONGO_PORT: int = 27017
-    MONGO_DB_NAME: str = 'Test'
+    MONGO_DB_NAME: str = 'all_products'
+
+    # Настройки LLM
+    LLM_URL: str = 'http://31.192.108.141:11434/'
+    MODEL_NAME: str = 'qwen2.5:7b'
 
     # Получение ссылки для подключения к Postgres
     @property
