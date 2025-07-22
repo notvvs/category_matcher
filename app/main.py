@@ -1,7 +1,7 @@
 import asyncio
 
 from app.db.session import async_session
-from app.repository.category_repository import CategoryRepo
+from app.repository.postgres_repository import CategoryRepo
 
 
 async def fetch_parents():

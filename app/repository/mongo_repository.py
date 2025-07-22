@@ -7,7 +7,7 @@ from pymongo.errors import PyMongoError
 
 logger = logging.getLogger(__name__)
 
-class MongoRepository:
+class MongoRepo:
     def __init__(self, database: AsyncIOMotorDatabase, collection_name: str):
         self.collection: AsyncIOMotorCollection = database[collection_name]
 

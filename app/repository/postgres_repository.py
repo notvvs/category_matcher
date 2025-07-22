@@ -11,7 +11,7 @@ from app.models.category import Category
 logger = logging.getLogger(__name__)
 
 
-class CategoryRepo:
+class PostgresRepo:
     def __init__(self, session: AsyncSession):
         self.session = session
 
