@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 import logging
 
@@ -11,6 +12,7 @@ from app.db.database import async_session
 
 logger = logging.getLogger(__name__)
 
+@asynccontextmanager
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Получение сессии для ДИ"""
     try:
