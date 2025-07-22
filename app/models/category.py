@@ -2,7 +2,10 @@ from sqlalchemy import BigInteger, Text, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from typing import Optional, List
 
-class Category(DeclarativeBase):
+class Base(DeclarativeBase):
+    pass
+
+class Category(Base):
     __tablename__ = "categories"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
