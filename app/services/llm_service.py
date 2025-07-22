@@ -1,5 +1,10 @@
 import httpx
+import logging
+from typing import Optional
+
 from app.core.settings import settings
+
+logger = logging.getLogger(__name__)
 
 
 class OllamaCategorizer:
@@ -7,9 +12,9 @@ class OllamaCategorizer:
         self.model_name = settings.MODEL_NAME
         self.llm_url = settings.LLM_URL
 
-    def categorize_product(self, product_name, description, category_list):
+    def categorize_product(self, product_name: str, description: str, category_list: list) -> Optional[str]:
         """Категоризирует товар используя Ollama"""
-        # Формируем промпт
+
         prompt = f"""
 Ты - эксперт по категоризации товаров. Твоя задача - присвоить товару наиболее подходящую категорию из предоставленного списка.
 
@@ -46,23 +51,43 @@ class OllamaCategorizer:
 
 Определи наиболее подходящую категорию согласно инструкции выше."""
 
-        # Отправляем запрос в Ollama
         payload = {
             "model": self.model_name,
             "prompt": prompt,
             "stream": False,
             "options": {
-                "temperature": 0.1,  # Низкая температура для стабильных ответов
+                "temperature": 0.1,
                 "top_p": 0.9,
                 "top_k": 10
             }
         }
 
-        response = httpx.post(self.llm_url, json=payload, timeout=60)
-        response.raise_for_status()
+        try:
+            response = httpx.post(
+                f"{self.llm_url.rstrip('/')}/api/generate",
+                json=payload,
+                timeout=60
+            )
+            response.raise_for_status()
 
-        # Парсим ответ
-        result = response.json()
-        raw_answer = result.get('response', '').strip()
+            result = response.json()
+            raw_answer = result.get('response', '').strip()
 
-        return raw_answer
+            if not raw_answer:
+                logger.warning("Empty response from LLM service")
+                return None
+
+            return raw_answer
+
+        except httpx.TimeoutException:
+            logger.error("LLM service timeout")
+            return None
+        except httpx.HTTPStatusError as e:
+            logger.error(f"LLM service HTTP error: {e.response.status_code}")
+            return None
+        except httpx.RequestError as e:
+            logger.error(f"LLM service connection error: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error in LLM service: {e}")
+            return None

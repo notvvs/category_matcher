@@ -1,5 +1,4 @@
 import asyncio
-from tabnanny import check
 
 from app.db.session import async_session
 from app.repository.category_repository import CategoryRepo
