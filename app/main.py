@@ -6,6 +6,8 @@ from fastapi import FastAPI
 
 from app.api.v1.router import api_router
 from app.core.settings import settings
+from app.db.database import engine
+from app.db.session import MongoConnection
 
 logging.basicConfig(
     level=logging.INFO,
@@ -15,15 +17,25 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Запуск приложения...")
 
-    # Startup
-    yield
-
-    # Shutdown - закрываем соединения
-    logger.info("Остановка приложения...")
+    # Startup - инициализируем соединения
+    try:
+        # MongoDB соединение будет создано при первом обращении
+        logger.info("Приложение запущено успешно")
+        yield
+    except Exception as e:
+        logger.error(f"Ошибка при запуске: {e}")
+        raise
+    finally:
+        # Shutdown - закрываем соединения
+        logger.info("Остановка приложения...")
+        await MongoConnection.close()
+        await engine.dispose()
+        logger.info("Приложение остановлено")
 
 
 app = FastAPI(
@@ -44,7 +56,7 @@ app.add_middleware(
 @app.get("/")
 async def root():
     return {
-        "message": "Tender Products Matcher API",
+        "message": "Category API",
         "version": "1.0.0"
     }
 
