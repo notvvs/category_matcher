@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     LLM_URL: str = 'http://31.192.108.141:11434/'
     MODEL_NAME: str = 'qwen2.5:7b'
 
+    # Настройки апи
+    API_HOST: str = '0.0.0.0'
+    API_PORT: int = 8000
+
     # Получение ссылки для подключения к Postgres
     @property
     def get_postgres_dsn(self) -> str:

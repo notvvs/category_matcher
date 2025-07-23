@@ -41,10 +41,6 @@ class OllamaCategorizer:
 **Ответ:**
 Смартфоны
 
----
-
-## Шаблон для использования:
-
 **Товар:** {product_name}
 **Описание:** {description}
 **Доступные категории:** {category_list}

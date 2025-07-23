@@ -1,50 +1,67 @@
-import asyncio
+import logging
+from contextlib import asynccontextmanager
 
-from motor.motor_asyncio import AsyncIOMotorDatabase
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI
 
+from app.api.v1.router import api_router
 from app.core.settings import settings
-from app.db.session import get_db, get_mongo_db
-from app.repository.mongo_repository import MongoRepo
-from app.repository.postgres_repository import PostgresRepo
-from app.services.llm_service import OllamaCategorizer
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+
+logger = logging.getLogger(__name__)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Запуск приложения...")
+
+    # Startup
+    yield
+
+    # Shutdown - закрываем соединения
+    logger.info("Остановка приложения...")
 
 
-class Test:
-    def __init__(self, postgres_session: AsyncSession, mongo_db: AsyncIOMotorDatabase, collection_name: str):
-        self.llm = OllamaCategorizer()
-        self.postgres = PostgresRepo(postgres_session)
-        self.mongodb = MongoRepo(mongo_db, collection_name)
+app = FastAPI(
+    title="Category Service",
+    description="API для поиска товаров по требованиям тендера с использованием LLM",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
-    async def test(self):
-        products = await self.mongodb.get_all()
-        print(f"Найдено продуктов: {len(products)}")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-        for product in products:
-            print(">>> ПРОДУКТ:", product.get("title"))
-            category = product.get("yandex_category")
-            print("Категория:", category)
-            if category:
-                children = await self.postgres.get_children(category)
-                print("Дочерние категории:", children)
+@app.get("/")
+async def root():
+    return {
+        "message": "Tender Products Matcher API",
+        "version": "1.0.0"
+    }
 
-                res = await self.llm.categorize_product(
-                    product.get("title"),
-                    product.get("description"),
-                    category
-                )
-                print("Категоризация:", res)
+@app.get("/health")
+async def health_check():
+    """Простой health check для Kubernetes liveness probe"""
+    return {"status": "ok"}
 
+app.include_router(api_router, prefix="/api/v1")
 
-async def main():
-    # Получаем зависимости
-    async with get_db() as postgres_session:
-        mongo_db = await get_mongo_db()
+if __name__ == "__main__":
+    import uvicorn
 
-        # Создаем экземпляр Test
-        test = Test(postgres_session, mongo_db, 'test')
+    uvicorn.run(
+        "app.main:app",
+        host=settings.API_HOST,
+        port=settings.API_PORT,
+        log_level="info"
+    )
 
-        # Вызываем метод
-        await test.test()
-
-asyncio.run(main())
